@@ -18,7 +18,7 @@ use wgpu::{
     Sampler, SamplerBindingType, SamplerDescriptor, ShaderModule, ShaderModuleDescriptor,
     ShaderSource, ShaderStages, Texture, TextureAspect, TextureDescriptor, TextureDimension,
     TextureFormat, TextureSampleType, TextureUsages, TextureView, TextureViewDescriptor,
-    TextureViewDimension, VertexFormat, VertexState,
+    TextureViewDimension, VertexFormat, VertexState, PrimitiveTopology,
 };
 
 type Hasher = BuildHasherDefault<FxHasher>;
@@ -311,7 +311,7 @@ impl TextAtlas {
 
         let vertex_buffers = [wgpu::VertexBufferLayout {
             array_stride: size_of::<GlyphToRender>() as wgpu::BufferAddress,
-            step_mode: wgpu::VertexStepMode::Vertex,
+            step_mode: wgpu::VertexStepMode::Instance,
             attributes: &[
                 wgpu::VertexAttribute {
                     format: VertexFormat::Sint32x2,
@@ -528,7 +528,10 @@ impl TextAtlas {
                             write_mask: ColorWrites::default(),
                         })],
                     }),
-                    primitive: PrimitiveState::default(),
+                    primitive: PrimitiveState {
+                        topology: PrimitiveTopology::TriangleStrip,
+                        ..PrimitiveState::default()
+                    },
                     depth_stencil: depth_stencil.clone(),
                     multisample,
                     multiview: None,
