@@ -5,17 +5,19 @@ use crate::{
 use std::{mem::size_of, num::NonZeroU64, slice, sync::Arc};
 use wgpu::util::StagingBelt;
 use wgpu::{
-    Buffer, BufferDescriptor, BufferUsages, CommandEncoder, DepthStencilState, Device, Extent3d,
-    ImageCopyTexture, ImageDataLayout, MultisampleState, Origin3d, Queue, RenderPass,
-    RenderPipeline, TextureAspect, COPY_BUFFER_ALIGNMENT,
+    BindGroupDescriptor, BindGroupEntry, Buffer, BufferDescriptor, BufferUsages, CommandEncoder,
+    DepthStencilState, Device, Extent3d, ImageCopyTexture, ImageDataLayout, MultisampleState,
+    Origin3d, Queue, RenderPass, RenderPipeline, TextureAspect, COPY_BUFFER_ALIGNMENT,
 };
 
 /// A text renderer that uses cached glyphs to render text into an existing render pass.
 pub struct TextRenderer {
     staging_belt: StagingBelt,
+    params: Params,
+    params_buffer: Buffer,
+    bind_group: wgpu::BindGroup,
     vertex_buffer: Buffer,
     vertex_buffer_size: u64,
-    screen_resolution: Resolution,
     pipeline: Arc<RenderPipeline>,
     glyph_vertices: Vec<GlyphToRender>,
     glyphs_to_render: u32,
@@ -39,14 +41,37 @@ impl TextRenderer {
 
         let pipeline = atlas.get_or_create_pipeline(device, multisample, depth_stencil);
 
-        Self {
-            staging_belt: StagingBelt::new(vertex_buffer_size),
-            vertex_buffer,
-            vertex_buffer_size,
+        let params = Params {
             screen_resolution: Resolution {
                 width: 0,
                 height: 0,
             },
+            _pad: [0, 0],
+        };
+
+        let params_buffer = device.create_buffer(&BufferDescriptor {
+            label: Some("glyphon params"),
+            size: size_of::<Params>() as u64,
+            usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+
+        let bind_group = device.create_bind_group(&BindGroupDescriptor {
+            layout: &atlas.text_render_bind_group_layout,
+            entries: &[BindGroupEntry {
+                binding: 0,
+                resource: params_buffer.as_entire_binding(),
+            }],
+            label: Some("glyphon text render bind group"),
+        });
+
+        Self {
+            staging_belt: StagingBelt::new(vertex_buffer_size),
+            params,
+            params_buffer,
+            bind_group,
+            vertex_buffer,
+            vertex_buffer_size,
             pipeline,
             glyph_vertices: Vec::new(),
             glyphs_to_render: 0,
@@ -67,15 +92,12 @@ impl TextRenderer {
         mut metadata_to_depth: impl FnMut(usize) -> f32,
     ) -> Result<(), PrepareError> {
         self.staging_belt.recall();
-        self.screen_resolution = screen_resolution;
 
-        let atlas_current_resolution = { atlas.params.screen_resolution };
-
-        if screen_resolution != atlas_current_resolution {
-            atlas.params.screen_resolution = screen_resolution;
-            queue.write_buffer(&atlas.params_buffer, 0, unsafe {
+        if self.params.screen_resolution != screen_resolution {
+            self.params.screen_resolution = screen_resolution;
+            queue.write_buffer(&self.params_buffer, 0, unsafe {
                 slice::from_raw_parts(
-                    &atlas.params as *const Params as *const u8,
+                    &self.params as *const Params as *const u8,
                     size_of::<Params>(),
                 )
             });
@@ -362,15 +384,9 @@ impl TextRenderer {
             return Ok(());
         }
 
-        {
-            // Validate that screen resolution hasn't changed since `prepare`
-            if self.screen_resolution != atlas.params.screen_resolution {
-                return Err(RenderError::ScreenResolutionChanged);
-            }
-        }
-
         pass.set_pipeline(&self.pipeline);
-        pass.set_bind_group(0, &atlas.bind_group, &[]);
+        pass.set_bind_group(0, &self.bind_group, &[]);
+        pass.set_bind_group(1, &atlas.bind_group, &[]);
         pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
         pass.draw(0..4, 0..self.glyphs_to_render);
 
