@@ -25,11 +25,13 @@ async fn run() {
     // Set up window
     let (width, height) = (800, 600);
     let event_loop = EventLoop::new().unwrap();
-    let window = Arc::new(WindowBuilder::new()
-        .with_inner_size(LogicalSize::new(width as f64, height as f64))
-        .with_title("glyphon hello world")
-        .build(&event_loop)
-        .unwrap());
+    let window = Arc::new(
+        WindowBuilder::new()
+            .with_inner_size(LogicalSize::new(width as f64, height as f64))
+            .with_title("glyphon hello world")
+            .build(&event_loop)
+            .unwrap(),
+    );
     let size = window.inner_size();
     let scale_factor = window.scale_factor();
 
@@ -51,7 +53,9 @@ async fn run() {
         .await
         .unwrap();
 
-    let surface = instance.create_surface(window.clone()).expect("Create surface");
+    let surface = instance
+        .create_surface(window.clone())
+        .expect("Create surface");
     let swapchain_format = TextureFormat::Bgra8UnormSrgb;
     let mut config = SurfaceConfiguration {
         usage: TextureUsages::RENDER_ATTACHMENT,
@@ -95,10 +99,14 @@ async fn run() {
                         window.request_redraw();
                     }
                     WindowEvent::RedrawRequested => {
+                        let mut encoder = device
+                            .create_command_encoder(&CommandEncoderDescriptor { label: None });
+
                         text_renderer
                             .prepare(
                                 &device,
                                 &queue,
+                                &mut encoder,
                                 &mut font_system,
                                 &mut atlas,
                                 Resolution {
@@ -124,8 +132,6 @@ async fn run() {
 
                         let frame = surface.get_current_texture().unwrap();
                         let view = frame.texture.create_view(&TextureViewDescriptor::default());
-                        let mut encoder = device
-                            .create_command_encoder(&CommandEncoderDescriptor { label: None });
                         {
                             let mut pass = encoder.begin_render_pass(&RenderPassDescriptor {
                                 label: None,

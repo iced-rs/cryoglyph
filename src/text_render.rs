@@ -2,15 +2,17 @@ use crate::{
     ColorMode, FontSystem, GlyphDetails, GlyphToRender, GpuCacheStatus, Params, PrepareError,
     RenderError, Resolution, SwashCache, SwashContent, TextArea, TextAtlas,
 };
-use std::{iter, mem::size_of, slice, sync::Arc};
+use std::{iter, mem::size_of, num::NonZeroU64, slice, sync::Arc};
+use wgpu::util::StagingBelt;
 use wgpu::{
-    Buffer, BufferDescriptor, BufferUsages, DepthStencilState, Device, Extent3d, ImageCopyTexture,
-    ImageDataLayout, IndexFormat, MultisampleState, Origin3d, Queue, RenderPass, RenderPipeline,
-    TextureAspect, COPY_BUFFER_ALIGNMENT,
+    Buffer, BufferDescriptor, BufferUsages, CommandEncoder, DepthStencilState, Device, Extent3d,
+    ImageCopyTexture, ImageDataLayout, IndexFormat, MultisampleState, Origin3d, Queue, RenderPass,
+    RenderPipeline, TextureAspect, COPY_BUFFER_ALIGNMENT,
 };
 
 /// A text renderer that uses cached glyphs to render text into an existing render pass.
 pub struct TextRenderer {
+    staging_belt: StagingBelt,
     vertex_buffer: Buffer,
     vertex_buffer_size: u64,
     index_buffer: Buffer,
@@ -47,6 +49,7 @@ impl TextRenderer {
         let pipeline = atlas.get_or_create_pipeline(device, multisample, depth_stencil);
 
         Self {
+            staging_belt: StagingBelt::new(vertex_buffer_size),
             vertex_buffer,
             vertex_buffer_size,
             index_buffer,
@@ -65,6 +68,7 @@ impl TextRenderer {
         &mut self,
         device: &Device,
         queue: &Queue,
+        encoder: &mut CommandEncoder,
         font_system: &mut FontSystem,
         atlas: &mut TextAtlas,
         screen_resolution: Resolution,
@@ -72,6 +76,7 @@ impl TextRenderer {
         cache: &mut SwashCache,
         mut metadata_to_depth: impl FnMut(usize) -> f32,
     ) -> Result<(), PrepareError> {
+        self.staging_belt.recall();
         self.screen_resolution = screen_resolution;
 
         let atlas_current_resolution = { atlas.params.screen_resolution };
@@ -320,7 +325,15 @@ impl TextRenderer {
         };
 
         if self.vertex_buffer_size >= vertices_raw.len() as u64 {
-            queue.write_buffer(&self.vertex_buffer, 0, vertices_raw);
+            self.staging_belt
+                .write_buffer(
+                    encoder,
+                    &self.vertex_buffer,
+                    0,
+                    NonZeroU64::new(vertices_raw.len() as u64).expect("Non-empty vertices"),
+                    device,
+                )
+                .copy_from_slice(vertices_raw);
         } else {
             self.vertex_buffer.destroy();
 
@@ -333,6 +346,9 @@ impl TextRenderer {
 
             self.vertex_buffer = buffer;
             self.vertex_buffer_size = buffer_size;
+
+            self.staging_belt.finish();
+            self.staging_belt = StagingBelt::new(buffer_size);
         }
 
         let indices = glyph_indices.as_slice();
@@ -344,7 +360,15 @@ impl TextRenderer {
         };
 
         if self.index_buffer_size >= indices_raw.len() as u64 {
-            queue.write_buffer(&self.index_buffer, 0, indices_raw);
+            self.staging_belt
+                .write_buffer(
+                    encoder,
+                    &self.index_buffer,
+                    0,
+                    NonZeroU64::new(indices_raw.len() as u64).expect("Non-empty indices"),
+                    device,
+                )
+                .copy_from_slice(indices_raw);
         } else {
             self.index_buffer.destroy();
 
@@ -359,6 +383,8 @@ impl TextRenderer {
             self.index_buffer_size = buffer_size;
         }
 
+        self.staging_belt.finish();
+
         Ok(())
     }
 
@@ -366,6 +392,7 @@ impl TextRenderer {
         &mut self,
         device: &Device,
         queue: &Queue,
+        encoder: &mut CommandEncoder,
         font_system: &mut FontSystem,
         atlas: &mut TextAtlas,
         screen_resolution: Resolution,
@@ -375,6 +402,7 @@ impl TextRenderer {
         self.prepare_with_depth(
             device,
             queue,
+            encoder,
             font_system,
             atlas,
             screen_resolution,
