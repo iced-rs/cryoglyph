@@ -20,6 +20,8 @@ pub struct TextRenderer {
     vertices_to_render: u32,
     screen_resolution: Resolution,
     pipeline: Arc<RenderPipeline>,
+    glyph_vertices: Vec<GlyphToRender>,
+    glyph_indices: Vec<u32>,
 }
 
 impl TextRenderer {
@@ -60,6 +62,8 @@ impl TextRenderer {
                 height: 0,
             },
             pipeline,
+            glyph_vertices: Vec::new(),
+            glyph_indices: Vec::new(),
         }
     }
 
@@ -91,8 +95,8 @@ impl TextRenderer {
             });
         }
 
-        let mut glyph_vertices: Vec<GlyphToRender> = Vec::new();
-        let mut glyph_indices: Vec<u32> = Vec::new();
+        self.glyph_vertices.clear();
+        self.glyph_indices.clear();
         let mut glyphs_added = 0;
 
         for text_area in text_areas {
@@ -275,7 +279,7 @@ impl TextRenderer {
 
                     let depth = metadata_to_depth(glyph.metadata);
 
-                    glyph_vertices.extend(
+                    self.glyph_vertices.extend(
                         iter::repeat(GlyphToRender {
                             pos: [x, y],
                             dim: [width as u16, height as u16],
@@ -294,7 +298,7 @@ impl TextRenderer {
                     );
 
                     let start = 4 * glyphs_added as u32;
-                    glyph_indices.extend([
+                    self.glyph_indices.extend([
                         start,
                         start + 1,
                         start + 2,
@@ -316,7 +320,7 @@ impl TextRenderer {
             return Ok(());
         }
 
-        let vertices = glyph_vertices.as_slice();
+        let vertices = self.glyph_vertices.as_slice();
         let vertices_raw = unsafe {
             slice::from_raw_parts(
                 vertices as *const _ as *const u8,
@@ -351,7 +355,7 @@ impl TextRenderer {
             self.staging_belt = StagingBelt::new(buffer_size);
         }
 
-        let indices = glyph_indices.as_slice();
+        let indices = self.glyph_indices.as_slice();
         let indices_raw = unsafe {
             slice::from_raw_parts(
                 indices as *const _ as *const u8,
