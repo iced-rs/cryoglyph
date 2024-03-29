@@ -95,10 +95,14 @@ async fn run() {
                         window.request_redraw();
                     }
                     WindowEvent::RedrawRequested => {
+                        let mut encoder = device
+                            .create_command_encoder(&CommandEncoderDescriptor { label: None });
+
                         text_renderer
                             .prepare(
                                 &device,
                                 &queue,
+                                &mut encoder,
                                 &mut font_system,
                                 &mut atlas,
                                 Resolution {
@@ -124,8 +128,6 @@ async fn run() {
 
                         let frame = surface.get_current_texture().unwrap();
                         let view = frame.texture.create_view(&TextureViewDescriptor::default());
-                        let mut encoder = device
-                            .create_command_encoder(&CommandEncoderDescriptor { label: None });
                         {
                             let mut pass = encoder.begin_render_pass(&RenderPassDescriptor {
                                 label: None,
