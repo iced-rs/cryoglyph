@@ -1,9 +1,9 @@
 use cosmic_text::{Attrs, Buffer, Color, Family, FontSystem, Metrics, Shaping, SwashCache};
 use criterion::{criterion_group, criterion_main, Criterion};
-use glyphon::{
+use cryoglyph::{
     Cache, ColorMode, Resolution, TextArea, TextAtlas, TextBounds, TextRenderer, Viewport, Weight,
 };
-use wgpu::{MultisampleState, TextureFormat};
+use wgpu::{CommandEncoderDescriptor, MultisampleState, TextureFormat};
 
 mod state;
 
@@ -64,7 +64,11 @@ fn run_bench(ctx: &mut Criterion) {
                 .collect(),
         ),
     ] {
-        let buffers: Vec<glyphon::Buffer> = text_areas
+        let mut encoder = state
+            .device
+            .create_command_encoder(&CommandEncoderDescriptor { label: None });
+
+        let buffers: Vec<cryoglyph::Buffer> = text_areas
             .iter()
             .copied()
             .map(|s| {
@@ -92,7 +96,6 @@ fn run_bench(ctx: &mut Criterion) {
                             bottom: 1000,
                         },
                         default_color: Color::rgb(0, 0, 0),
-                        custom_glyphs: &[],
                     })
                     .collect();
 
@@ -101,6 +104,7 @@ fn run_bench(ctx: &mut Criterion) {
                         .prepare(
                             &state.device,
                             &state.queue,
+                            &mut encoder,
                             &mut font_system,
                             &mut atlas,
                             &viewport,
