@@ -67,7 +67,25 @@ impl TextRenderer {
         let resolution = viewport.resolution();
 
         for text_area in text_areas {
-            for run in text_area.buffer.layout_runs() {
+            let bounds_min_x = text_area.bounds.left.max(0);
+            let bounds_min_y = text_area.bounds.top.max(0);
+            let bounds_max_x = text_area.bounds.right.min(resolution.width as i32);
+            let bounds_max_y = text_area.bounds.bottom.min(resolution.height as i32);
+
+            let is_run_visible = |run: &cosmic_text::LayoutRun| {
+                let start_y = (text_area.top + run.line_top) as i32;
+                let end_y = (text_area.top + run.line_top + run.line_height) as i32;
+
+                start_y <= bounds_max_y && bounds_min_y <= end_y
+            };
+
+            let layout_runs = text_area
+                .buffer
+                .layout_runs()
+                .skip_while(|run| !is_run_visible(run))
+                .take_while(is_run_visible);
+
+            for run in layout_runs {
                 for glyph in run.glyphs.iter() {
                     let physical_glyph =
                         glyph.physical((text_area.left, text_area.top), text_area.scale);
@@ -188,11 +206,6 @@ impl TextRenderer {
 
                     let mut width = details.width as i32;
                     let mut height = details.height as i32;
-
-                    let bounds_min_x = text_area.bounds.left.max(0);
-                    let bounds_min_y = text_area.bounds.top.max(0);
-                    let bounds_max_x = text_area.bounds.right.min(resolution.width as i32);
-                    let bounds_max_y = text_area.bounds.bottom.min(resolution.height as i32);
 
                     // Starts beyond right edge or ends beyond left edge
                     let max_x = x + width;
