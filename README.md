@@ -1,5 +1,5 @@
 <h1 align="center">
-  🦅 glyphon 🦁
+  🧊🦅 iced_glyphon 🦁🧊
 </h1>
 <div align="center">
   Fast, simple 2D text rendering for <a href="https://github.com/gfx-rs/wgpu/"><code>wgpu</code></a>
@@ -14,13 +14,11 @@
 
 ## What is this?
 
-This crate provides a simple way to render 2D text with [`wgpu`](https://github.com/gfx-rs/wgpu/) by:
+This is a temporary fork of [`glyphon`] used by [`iced`] until [this `wgpu` issue] is fixed.
 
-- shaping/calculating layout/rasterizing glyphs (with [`cosmic-text`](https://github.com/pop-os/cosmic-text/))
-- packing the glyphs into texture atlas (with [`etagere`](https://github.com/nical/etagere/))
-- sampling from the texture atlas to render text (with [`wgpu`](https://github.com/gfx-rs/wgpu/))
-
-To avoid extra render passes, rendering uses existing render passes (following the middleware pattern described in [`wgpu`'s Encapsulating Graphics Work wiki page](https://github.com/gfx-rs/wgpu/wiki/Encapsulating-Graphics-Work).
+[`glyphon`]: https://github.com/grovesNL/glyphon
+[`iced`]: https://github.com/iced-rs/iced
+[this `wgpu` issue]: https://github.com/gfx-rs/wgpu/issues/5756
 
 ## License
 
