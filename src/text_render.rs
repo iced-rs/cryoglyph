@@ -336,11 +336,11 @@ impl TextRenderer {
     }
 
     /// Renders all layouts that were previously provided to `prepare`.
-    pub fn render<'pass>(
-        &'pass self,
-        atlas: &'pass TextAtlas,
-        viewport: &'pass Viewport,
-        pass: &mut RenderPass<'pass>,
+    pub fn render(
+        &self,
+        atlas: &TextAtlas,
+        viewport: &Viewport,
+        pass: &mut RenderPass<'_>,
     ) -> Result<(), RenderError> {
         if self.glyphs_to_render == 0 {
             return Ok(());
