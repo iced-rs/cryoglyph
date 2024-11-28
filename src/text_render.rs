@@ -72,18 +72,16 @@ impl TextRenderer {
                     let physical_glyph =
                         glyph.physical((text_area.left, text_area.top), text_area.scale);
 
-                    if atlas
-                        .mask_atlas
-                        .glyph_cache
-                        .contains(&physical_glyph.cache_key)
+                    let cache_key = physical_glyph.cache_key;
+
+                    let details = if let Some(details) =
+                        atlas.mask_atlas.glyph_cache.get(&cache_key)
                     {
-                        atlas.mask_atlas.promote(physical_glyph.cache_key);
-                    } else if atlas
-                        .color_atlas
-                        .glyph_cache
-                        .contains(&physical_glyph.cache_key)
-                    {
-                        atlas.color_atlas.promote(physical_glyph.cache_key);
+                        atlas.mask_atlas.glyphs_in_use.insert(cache_key);
+                        details
+                    } else if let Some(details) = atlas.color_atlas.glyph_cache.get(&cache_key) {
+                        atlas.color_atlas.glyphs_in_use.insert(cache_key);
+                        details
                     } else {
                         let Some(image) =
                             cache.get_image_uncached(font_system, physical_glyph.cache_key)
@@ -167,20 +165,17 @@ impl TextRenderer {
                             (GpuCacheStatus::SkipRasterization, None, inner)
                         };
 
-                        inner.put(
-                            physical_glyph.cache_key,
-                            GlyphDetails {
-                                width: width as u16,
-                                height: height as u16,
-                                gpu_cache,
-                                atlas_id,
-                                top: image.placement.top as i16,
-                                left: image.placement.left as i16,
-                            },
-                        );
-                    }
-
-                    let details = atlas.glyph(&physical_glyph.cache_key).unwrap();
+                        inner.glyphs_in_use.insert(cache_key);
+                        // Insert the glyph into the cache and return the details reference
+                        inner.glyph_cache.get_or_insert(cache_key, || GlyphDetails {
+                            width: image.placement.width as u16,
+                            height: image.placement.height as u16,
+                            gpu_cache,
+                            atlas_id,
+                            top: image.placement.top as i16,
+                            left: image.placement.left as i16,
+                        })
+                    };
 
                     let mut x = physical_glyph.x + details.left as i32;
                     let mut y = (run.line_y * text_area.scale).round() as i32 + physical_glyph.y
