@@ -7,7 +7,7 @@ repository = "https://github.com/iced-rs/cryoglyph"
 license = "MIT OR Apache-2.0 OR Zlib"
 
 [dependencies]
-wgpu = { version = "23", default-features = false, features = ["wgsl"] }
+wgpu = { version = "24", default-features = false, features = ["wgsl"] }
 etagere = "0.2.10"
 cosmic-text = "0.12"
 lru = { version = "0.12.1", default-features = false }
@@ -15,5 +15,5 @@ rustc-hash = "2.0"
 
 [dev-dependencies]
 winit = "0.29"
-wgpu = "23"
+wgpu = "24"
 pollster = "0.4"
