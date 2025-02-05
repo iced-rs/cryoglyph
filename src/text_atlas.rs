@@ -4,7 +4,7 @@ use crate::{
 use etagere::{size2, Allocation, BucketedAtlasAllocator};
 use lru::LruCache;
 use rustc_hash::FxHasher;
-use std::{collections::HashSet, hash::BuildHasherDefault, sync::Arc};
+use std::{collections::HashSet, hash::BuildHasherDefault};
 use wgpu::{
     BindGroup, DepthStencilState, Device, Extent3d, MultisampleState, Origin3d, Queue,
     RenderPipeline, TexelCopyBufferLayout, TexelCopyTextureInfo, Texture, TextureAspect,
@@ -329,7 +329,7 @@ impl TextAtlas {
         device: &Device,
         multisample: MultisampleState,
         depth_stencil: Option<DepthStencilState>,
-    ) -> Arc<RenderPipeline> {
+    ) -> RenderPipeline {
         self.cache
             .get_or_create_pipeline(device, self.format, multisample, depth_stencil)
     }

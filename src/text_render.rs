@@ -2,7 +2,7 @@ use crate::{
     ColorMode, FontSystem, GlyphDetails, GlyphToRender, GpuCacheStatus, PrepareError, RenderError,
     SwashCache, SwashContent, TextArea, TextAtlas, Viewport,
 };
-use std::{num::NonZeroU64, slice, sync::Arc};
+use std::{num::NonZeroU64, slice};
 use wgpu::util::StagingBelt;
 use wgpu::{
     Buffer, BufferDescriptor, BufferUsages, CommandEncoder, DepthStencilState, Device, Extent3d,
@@ -15,7 +15,7 @@ pub struct TextRenderer {
     staging_belt: StagingBelt,
     vertex_buffer: Buffer,
     vertex_buffer_size: u64,
-    pipeline: Arc<RenderPipeline>,
+    pipeline: RenderPipeline,
     glyph_vertices: Vec<GlyphToRender>,
     glyphs_to_render: u32,
 }
