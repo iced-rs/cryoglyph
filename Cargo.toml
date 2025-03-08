@@ -1,10 +1,9 @@
 [package]
-name = "iced_glyphon"
+name = "cryoglyph"
 description = "Fast, simple 2D text rendering for wgpu"
-version = "0.6.0"
+version = "0.1.0"
 edition = "2021"
-homepage = "https://github.com/hecrj/glyphon.git"
-repository = "https://github.com/hecrj/glyphon"
+repository = "https://github.com/iced-rs/cryoglyph"
 license = "MIT OR Apache-2.0 OR Zlib"
 
 [dependencies]
