@@ -6,8 +6,8 @@ use std::{num::NonZeroU64, slice, sync::Arc};
 use wgpu::util::StagingBelt;
 use wgpu::{
     Buffer, BufferDescriptor, BufferUsages, CommandEncoder, DepthStencilState, Device, Extent3d,
-    ImageCopyTexture, ImageDataLayout, MultisampleState, Origin3d, Queue, RenderPass,
-    RenderPipeline, TextureAspect, COPY_BUFFER_ALIGNMENT,
+    MultisampleState, Origin3d, Queue, RenderPass, RenderPipeline, TexelCopyBufferLayout,
+    TexelCopyTextureInfo, TextureAspect, COPY_BUFFER_ALIGNMENT,
 };
 
 /// A text renderer that uses cached glyphs to render text into an existing render pass.
@@ -130,7 +130,7 @@ impl TextRenderer {
                             let atlas_min = allocation.rectangle.min;
 
                             queue.write_texture(
-                                ImageCopyTexture {
+                                TexelCopyTextureInfo {
                                     texture: &inner.texture,
                                     mip_level: 0,
                                     origin: Origin3d {
@@ -141,7 +141,7 @@ impl TextRenderer {
                                     aspect: TextureAspect::All,
                                 },
                                 &image.data,
-                                ImageDataLayout {
+                                TexelCopyBufferLayout {
                                     offset: 0,
                                     bytes_per_row: Some(width as u32 * inner.num_channels() as u32),
                                     rows_per_image: None,

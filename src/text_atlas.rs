@@ -6,9 +6,10 @@ use lru::LruCache;
 use rustc_hash::FxHasher;
 use std::{collections::HashSet, hash::BuildHasherDefault, sync::Arc};
 use wgpu::{
-    BindGroup, DepthStencilState, Device, Extent3d, ImageCopyTexture, ImageDataLayout,
-    MultisampleState, Origin3d, Queue, RenderPipeline, Texture, TextureAspect, TextureDescriptor,
-    TextureDimension, TextureFormat, TextureUsages, TextureView, TextureViewDescriptor,
+    BindGroup, DepthStencilState, Device, Extent3d, MultisampleState, Origin3d, Queue,
+    RenderPipeline, TexelCopyBufferLayout, TexelCopyTextureInfo, Texture, TextureAspect,
+    TextureDescriptor, TextureDimension, TextureFormat, TextureUsages, TextureView,
+    TextureViewDescriptor,
 };
 
 type Hasher = BuildHasherDefault<FxHasher>;
@@ -163,7 +164,7 @@ impl InnerAtlas {
             let height = image.placement.height as usize;
 
             queue.write_texture(
-                ImageCopyTexture {
+                TexelCopyTextureInfo {
                     texture: &self.texture,
                     mip_level: 0,
                     origin: Origin3d {
@@ -174,7 +175,7 @@ impl InnerAtlas {
                     aspect: TextureAspect::All,
                 },
                 &image.data,
-                ImageDataLayout {
+                TexelCopyBufferLayout {
                     offset: 0,
                     bytes_per_row: Some(width as u32 * self.kind.num_channels() as u32),
                     rows_per_image: None,
