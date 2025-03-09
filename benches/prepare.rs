@@ -1,5 +1,5 @@
 use cosmic_text::{Attrs, Buffer, Color, Family, FontSystem, Metrics, Shaping, SwashCache};
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, criterion_group, criterion_main};
 use cryoglyph::{
     Cache, ColorMode, Resolution, TextArea, TextAtlas, TextBounds, TextRenderer, Viewport, Weight,
 };

@@ -1,7 +1,7 @@
 use crate::{
-    text_render::ContentType, Cache, CacheKey, FontSystem, GlyphDetails, GpuCacheStatus, SwashCache,
+    Cache, CacheKey, FontSystem, GlyphDetails, GpuCacheStatus, SwashCache, text_render::ContentType,
 };
-use etagere::{size2, Allocation, BucketedAtlasAllocator};
+use etagere::{Allocation, BucketedAtlasAllocator, size2};
 use lru::LruCache;
 use rustc_hash::FxHasher;
 use std::{collections::HashSet, hash::BuildHasherDefault};

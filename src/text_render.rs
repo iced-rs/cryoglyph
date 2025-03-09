@@ -5,9 +5,9 @@ use crate::{
 use std::{num::NonZeroU64, slice};
 use wgpu::util::StagingBelt;
 use wgpu::{
-    Buffer, BufferDescriptor, BufferUsages, CommandEncoder, DepthStencilState, Device, Extent3d,
-    MultisampleState, Origin3d, Queue, RenderPass, RenderPipeline, TexelCopyBufferLayout,
-    TexelCopyTextureInfo, TextureAspect, COPY_BUFFER_ALIGNMENT,
+    Buffer, BufferDescriptor, BufferUsages, COPY_BUFFER_ALIGNMENT, CommandEncoder,
+    DepthStencilState, Device, Extent3d, MultisampleState, Origin3d, Queue, RenderPass,
+    RenderPipeline, TexelCopyBufferLayout, TexelCopyTextureInfo, TextureAspect,
 };
 
 /// A text renderer that uses cached glyphs to render text into an existing render pass.

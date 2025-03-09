@@ -2,7 +2,7 @@
 name = "cryoglyph"
 description = "Fast, simple 2D text rendering for wgpu"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 repository = "https://github.com/iced-rs/cryoglyph"
 license = "MIT OR Apache-2.0 OR Zlib"
 
