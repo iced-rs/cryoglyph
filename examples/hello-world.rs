@@ -77,7 +77,7 @@ impl WindowState {
         let mut atlas = TextAtlas::new(&device, &queue, &cache, swapchain_format);
         let text_renderer =
             TextRenderer::new(&mut atlas, &device, MultisampleState::default(), None);
-        let mut text_buffer = Buffer::new(&mut font_system, Metrics::new(30.0, 42.0));
+        let mut text_buffer = Buffer::new(&mut font_system, Metrics::new(10.0, 16.0));
 
         let physical_width = (physical_size.width as f64 * scale_factor) as f32;
         let physical_height = (physical_size.height as f64 * scale_factor) as f32;
@@ -87,7 +87,7 @@ impl WindowState {
             Some(physical_width),
             Some(physical_height),
         );
-        text_buffer.set_text(&mut font_system, "Hello world! 👋\nThis is rendered with 🦅 glyphon 🦁\nThe text below should be partially clipped.\na b c d e f g h i j k l m n o p q r s t u v w x y z", &Attrs::new().family(Family::SansSerif), Shaping::Advanced, None);
+        text_buffer.set_text(&mut font_system, "Hello world! 👋iiiiiiiiiiiiiiiii\nThis is rendered with 🦅 glyphon 🦁\nThe text below should be partially clipped.\na b c d e f g h i j k l m n o p q r s t u v w x y z", &Attrs::new().family(Family::SansSerif), Shaping::Advanced, None);
         text_buffer.shape_until_scroll(&mut font_system, false);
 
         Self {

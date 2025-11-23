@@ -9,7 +9,7 @@ license = "MIT OR Apache-2.0 OR Zlib"
 [dependencies]
 wgpu = { version = "27", default-features = false, features = ["wgsl"] }
 etagere = "0.2"
-cosmic-text = "0.15"
+cosmic-text = { git = "https://github.com/pop-os/cosmic-text.git", rev = "a07a6190548c8e40a55f6b7761387047ff1bf6ff" }
 lru = { version = "0.16", default-features = false }
 rustc-hash = "2"
 
