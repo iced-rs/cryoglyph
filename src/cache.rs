@@ -42,7 +42,7 @@ impl Cache {
             label: Some("glyphon sampler"),
             min_filter: FilterMode::Nearest,
             mag_filter: FilterMode::Nearest,
-            mipmap_filter: FilterMode::Nearest,
+            mipmap_filter: wgpu::MipmapFilterMode::Nearest,
             lod_min_clamp: 0f32,
             lod_max_clamp: 0f32,
             ..Default::default()
@@ -139,7 +139,7 @@ impl Cache {
         let pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
             label: None,
             bind_group_layouts: &[&atlas_layout, &uniforms_layout],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         Self(Arc::new(Inner {
@@ -237,7 +237,7 @@ impl Cache {
                     },
                     depth_stencil: depth_stencil.clone(),
                     multisample,
-                    multiview: None,
+                    multiview_mask: None,
                     cache: None,
                 });
 
