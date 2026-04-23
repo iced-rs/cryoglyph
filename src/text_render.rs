@@ -81,8 +81,7 @@ impl TextRenderer {
             };
 
             let layout_runs = text_area
-                .buffer
-                .layout_runs()
+                .text
                 .skip_while(|run| !is_run_visible(run))
                 .take_while(is_run_visible);
 

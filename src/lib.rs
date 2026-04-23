@@ -102,10 +102,9 @@ impl Default for TextBounds {
 }
 
 /// A text area containing text to be rendered along with its overflow behavior.
-#[derive(Clone)]
 pub struct TextArea<'a> {
     /// The buffer containing the text to be rendered.
-    pub buffer: &'a Buffer,
+    pub text: LayoutRunIter<'a>,
     /// The left edge of the buffer.
     pub left: f32,
     /// The top edge of the buffer.
