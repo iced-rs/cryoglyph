@@ -138,7 +138,7 @@ impl Cache {
 
         let pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
             label: None,
-            bind_group_layouts: &[&atlas_layout, &uniforms_layout],
+            bind_group_layouts: &[Some(&atlas_layout), Some(&uniforms_layout)],
             immediate_size: 0,
         });
 

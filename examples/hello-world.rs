@@ -43,7 +43,7 @@ impl WindowState {
         let scale_factor = window.scale_factor();
 
         // Set up surface
-        let instance = Instance::new(&InstanceDescriptor::default());
+        let instance = Instance::new(InstanceDescriptor::new_without_display_handle());
         let adapter = instance
             .request_adapter(&RequestAdapterOptions::default())
             .await
@@ -154,6 +154,9 @@ impl winit::application::ApplicationHandler for Application {
                 surface.configure(&device, &surface_config);
                 window.request_redraw();
             }
+            WindowEvent::Occluded(false) => {
+                window.request_redraw();
+            }
             WindowEvent::RedrawRequested => {
                 viewport.update(
                     &queue,
@@ -191,7 +194,19 @@ impl winit::application::ApplicationHandler for Application {
                     )
                     .unwrap();
 
-                let frame = surface.get_current_texture().unwrap();
+                let frame = match surface.get_current_texture() {
+                    wgpu::CurrentSurfaceTexture::Success(frame) => frame,
+                    wgpu::CurrentSurfaceTexture::Suboptimal(frame) => {
+                        surface.configure(&device, &surface_config);
+                        frame
+                    }
+                    wgpu::CurrentSurfaceTexture::Outdated => {
+                        window.request_redraw();
+                        return;
+                    }
+                    _ => return,
+                };
+
                 let view = frame.texture.create_view(&TextureViewDescriptor::default());
 
                 {

@@ -7,7 +7,7 @@ pub struct State {
 
 impl State {
     pub fn new() -> Self {
-        let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor::default());
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::new_without_display_handle());
 
         let adapter = block_on(wgpu::util::initialize_adapter_from_env_or_default(
             &instance, None,
