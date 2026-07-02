@@ -398,6 +398,7 @@ fn create_oversized_buffer(
     buffer
         .slice(..)
         .get_mapped_range_mut()
+        .unwrap()
         .slice(..contents.len())
         .copy_from_slice(contents);
     buffer.unmap();
