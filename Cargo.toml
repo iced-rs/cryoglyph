@@ -10,7 +10,7 @@ license = "MIT OR Apache-2.0 OR Zlib"
 [dependencies]
 wgpu = { version = "29", default-features = false, features = ["wgsl"] }
 etagere = "0.2"
-cosmic-text = "0.19"
+cosmic-text = { git = "https://github.com/hecrj/cosmic-text.git", rev = "6e10ac2ce889f48c9eeb1f19c1340a37d6afae31" }
 lru = { version = "0.16", default-features = false }
 rustc-hash = "2"
 
